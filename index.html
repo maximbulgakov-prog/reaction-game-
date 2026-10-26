@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17100c">
+  <title>High Noon · Quick Draw</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2317100c'/%3E%3Ctext x='16' y='25' text-anchor='middle' font-size='27' fill='%23ffc65b'%3E★%3C/text%3E%3C/svg%3E">
+  <style>
+    /* CSS controls the look. All fonts are already on your computer. */
+    :root { color-scheme: dark; --ink: #17100c; --gold: #ffc65b; --cream: #f6e6ca; --muted: #bca78f; --glow: #3f291b; --panel: #281c14; --hover: #342419; --wait: #392617; --edge: #986b3c; --shadow: #75421f; }
+    body[data-theme="neon"] { --ink: #100d23; --gold: #ff9bea; --cream: #f8eaff; --muted: #c4b4d8; --glow: #45225e; --panel: #271536; --hover: #362047; --wait: #40234d; --edge: #d670d0; --shadow: #713373; }
+    body[data-theme="moon"] { --ink: #090f20; --gold: #91d5ff; --cream: #e6f4ff; --muted: #a7bed7; --glow: #203d62; --panel: #14263f; --hover: #1c3453; --wait: #243b58; --edge: #6395c9; --shadow: #254e76; }
+    body[data-theme="gold"] { --ink: #171207; --gold: #ffe48b; --cream: #fff5da; --muted: #d4c394; --glow: #655018; --panel: #362a10; --hover: #493816; --wait: #4b3b16; --edge: #e7bf50; --shadow: #8b641b; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100svh; background: radial-gradient(ellipse at 50% 0%, var(--glow), var(--ink) 65%); color: var(--cream); font-family: system-ui, sans-serif; }
+    main { width: min(880px, 100%); margin: auto; padding: 28px 24px; }
+    .topline, footer { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    .eyebrow { color: var(--gold); font-size: .8rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
+    button { font: inherit; cursor: pointer; touch-action: manipulation; }
+    button:focus-visible { outline: 3px solid var(--cream); outline-offset: 5px; }
+    .sound { border: 1px solid #745439; color: var(--cream); background: #211710; padding: 10px 14px; border-radius: 4px; font-size: .875rem; }
+    header { text-align: center; padding: 24px 0 22px; }
+    h1 { font-family: Rockwell, 'Rockwell Extra Bold', Georgia, serif; font-size: clamp(3.2rem, 10vw, 6rem); line-height: .95; letter-spacing: -.055em; margin: 0; color: var(--gold); text-shadow: 0 4px 0 var(--shadow); }
+    .subtitle { margin: 14px 0 0; letter-spacing: .3em; font-size: .875rem; text-transform: uppercase; color: var(--cream); }
+    .scores { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid #66472e; border-bottom: 1px solid #66472e; margin-bottom: 20px; }
+    .score { text-align: center; padding: 15px 8px; }
+    .score + .score { border-left: 1px solid #66472e; }
+    .label { display: block; text-transform: uppercase; letter-spacing: .15em; font-size: .75rem; color: var(--muted); margin-bottom: 3px; }
+    .value { font: bold 1.65rem ui-monospace, monospace; }
+    #best { color: var(--gold); }
+    .arena { width: 100%; min-height: 310px; padding: 32px 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px solid var(--edge); border-radius: 8px; background: var(--panel); color: var(--cream); box-shadow: inset 0 0 0 6px #1b130e, 0 12px 32px #0004; user-select: none; -webkit-user-select: none; }
+    .arena[data-state="idle"]:hover, .arena[data-state="result"]:hover { background: var(--hover); }
+    .emblem { font-size: 2.8rem; color: var(--gold); line-height: 1; margin-bottom: 20px; }
+    .prompt { font-family: Rockwell, Georgia, serif; font-weight: 900; font-size: clamp(2rem, 7vw, 3.8rem); line-height: 1.1; text-transform: uppercase; }
+    .hint { font-size: 1rem; margin-top: 16px; line-height: 1.5; max-width: 460px; }
+    .arena[data-state="waiting"] { background: var(--wait); border-color: var(--gold); }
+    .arena[data-state="ready"] { background: #bdff62; border-color: #deffb2; color: #17270b; box-shadow: 0 0 36px #bdff6222; }
+    .arena[data-state="ready"] .emblem { color: #25400e; }
+    .arena[data-state="early"] { background: #49211b; border-color: #ff805e; }
+    .arena[data-state="early"] .emblem { color: #ff805e; }
+    .instructions { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px 28px; padding: 20px 0; color: var(--muted); font-size: .875rem; }
+    .instructions b { color: var(--gold); margin-right: 6px; }
+    .shop { margin: 4px 0 24px; padding: 20px; background: var(--panel); border: 1px solid var(--edge); border-radius: 8px; }
+    .shop h2 { margin: 0; font-family: Georgia, serif; color: var(--gold); }
+    .shop p { color: var(--muted); font-size: .875rem; line-height: 1.6; margin: 8px 0 16px; }
+    .styles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .style-card { border: 1px solid var(--edge); border-radius: 5px; padding: 14px; min-width: 0; }
+    .swatch { height: 36px; border-radius: 3px; margin-bottom: 12px; border: 1px solid #ffffff30; }
+    .style-card strong { display: block; font-size: 1rem; }
+    .style-card button { width: 100%; margin-top: 12px; padding: 10px 6px; border: 1px solid var(--gold); background: transparent; color: var(--gold); border-radius: 3px; font-size: .875rem; }
+    .style-card button:disabled { cursor: default; border-color: var(--muted); color: var(--muted); }
+    .style-card button[aria-pressed="true"] { background: var(--gold); color: var(--ink); border-color: var(--gold); }
+    #shop-message { min-height: 1.6em; margin-bottom: 0; }
+    #tokens { color: var(--gold); }
+    @media (max-width: 480px) { .score .value { font-size: 1.2rem; } .score .label { font-size: .65rem; letter-spacing: .06em; } .shop { padding: 14px; } }
+    footer { border-top: 1px solid #483322; padding-top: 15px; color: var(--muted); font-size: .75rem; line-height: 1.6; }
+    footer span:last-child { text-align: right; }
+    @media (max-width: 480px) { main { padding: 18px 16px; } .eyebrow { font-size: .7rem; letter-spacing: .1em; } header { padding-top: 28px; } .arena { min-height: 290px; } footer { align-items: flex-start; } }
+  </style>
+</head>
+<body>
+<main>
+  <div class="topline"><span class="eyebrow">★ The one-click showdown</span><button class="sound" id="sound" aria-pressed="true">Sound: on</button></div>
+  <header><h1>HIGH NOON</h1><p class="subtitle">Quick Draw</p></header>
+  <div class="scores">
+    <div class="score"><span class="label">Last draw</span><span class="value" id="last">— ms</span></div>
+    <div class="score"><span class="label">★ Personal best</span><span class="value" id="best">— ms</span></div>
+    <div class="score"><span class="label">Tokens</span><span class="value" id="tokens">0</span></div>
+  </div>
+  <button class="arena" id="arena" data-state="idle" aria-describedby="instructions">
+    <span class="emblem" id="emblem" aria-hidden="true">★</span>
+    <span class="prompt" id="prompt">Ready, partner?</span>
+    <span class="hint" id="hint">Click here to start the showdown.</span>
+  </button>
+  <div class="instructions" id="instructions"><span><b>01</b> Click to start</span><span><b>02</b> Wait for green</span><span><b>03</b> Click to draw</span></div>
+  <section class="shop" aria-labelledby="shop-title">
+    <h2 id="shop-title">The Trading Post</h2>
+    <p>Faster draws, bigger rewards. Under 200 ms: 10 tokens · under 300: 7 · under 400: 5 · under 600: 3 · 600+: 1. Early draws earn 0.</p>
+    <div class="styles">
+      <div class="style-card"><div class="swatch" style="background:linear-gradient(110deg,#17100c 50%,#ffc65b 50%)" aria-hidden="true"></div><strong>Classic Saloon</strong><button data-style="classic">Equipped</button></div>
+      <div class="style-card"><div class="swatch" style="background:linear-gradient(110deg,#271536 50%,#ff9bea 50%)" aria-hidden="true"></div><strong>Neon Outlaw</strong><button data-style="neon">Buy · 25 tokens</button></div>
+      <div class="style-card"><div class="swatch" style="background:linear-gradient(110deg,#14263f 50%,#91d5ff 50%)" aria-hidden="true"></div><strong>Midnight Rider</strong><button data-style="moon">Buy · 50 tokens</button></div>
+      <div class="style-card"><div class="swatch" style="background:linear-gradient(110deg,#362a10 50%,#ffe48b 50%)" aria-hidden="true"></div><strong>Gold Rush</strong><button data-style="gold">Buy · 100 tokens</button></div>
+    </div>
+    <p id="shop-message" role="status">Buy once, switch anytime. Every style uses the same green draw cue.</p>
+  </section>
+  <footer><span>No Wi-Fi. Just quick hands.</span><span id="storage-note">Best, tokens & styles saved in this browser.<br>Lower time wins.</span></footer>
+  <div id="announcement" role="status" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)"></div>
+</main>
+<script>
+  // Easy tuning knobs: change these numbers to adjust the random wait.
+  const MIN_WAIT_MS = 1800;
+  const MAX_WAIT_MS = 4800;
+  const BEST_KEY = 'high-noon-best-v1';
+  const PROGRESS_KEY = 'high-noon-progress-v1';
+  // Prices and rewards are kept in one place so balancing is easy.
+  const STYLES = {
+    classic: { name: 'Classic Saloon', cost: 0 },
+    neon: { name: 'Neon Outlaw', cost: 25 },
+    moon: { name: 'Midnight Rider', cost: 50 },
+    gold: { name: 'Gold Rush', cost: 100 }
+  };
+  let tokens = 0;
+  let owned = ['classic'];
+  let selectedStyle = 'classic';
+  const shopButtons = [...document.querySelectorAll('[data-style]')];
+  const arena = document.getElementById('arena');
+  const prompt = document.getElementById('prompt');
+  const hint = document.getElementById('hint');
+  const emblem = document.getElementById('emblem');
+  const bestDisplay = document.getElementById('best');
+  const soundButton = document.getElementById('sound');
+  let state = 'idle';
+  let best = null;
+  let timer = null;
+  let frame = null;
+  let readyAt = 0;
+  let retryAfter = 0;
+  let audioContext;
+  let soundEnabled = true;
+
+  // Storage can be blocked by browser settings; the game still works.
+  function storageUnavailable() {
+    document.getElementById('storage-note').textContent = 'Best, tokens & styles kept for this session. Lower time wins.';
+  }
+  try {
+    const saved = Number(localStorage.getItem(BEST_KEY));
+    if (Number.isFinite(saved) && saved > 0) best = saved;
+  } catch { storageUnavailable(); }
+  function showBest() { bestDisplay.textContent = best === null ? '— ms' : best + ' ms'; }
+  showBest();
+
+  // A separate save preserves personal bests from the original version.
+  try {
+    const saved = JSON.parse(localStorage.getItem(PROGRESS_KEY));
+    if (saved && typeof saved === 'object') {
+      if (Number.isSafeInteger(saved.tokens) && saved.tokens >= 0) tokens = saved.tokens;
+      if (Array.isArray(saved.owned)) owned = [...new Set(['classic', ...saved.owned.filter(id => Object.hasOwn(STYLES, id))])];
+      if (owned.includes(saved.selectedStyle)) selectedStyle = saved.selectedStyle;
+    }
+  } catch { storageUnavailable(); }
+  function saveProgress() {
+    try { localStorage.setItem(PROGRESS_KEY, JSON.stringify({ tokens, owned, selectedStyle })); }
+    catch { storageUnavailable(); }
+  }
+  function renderShop() {
+    document.getElementById('tokens').textContent = tokens.toLocaleString();
+    document.body.dataset.theme = selectedStyle;
+    const roundActive = state === 'waiting' || state === 'ready';
+    for (const button of shopButtons) {
+      const id = button.dataset.style;
+      const equipped = selectedStyle === id;
+      const unlocked = owned.includes(id);
+      const price = STYLES[id].cost;
+      button.textContent = equipped ? 'Equipped' : unlocked ? 'Equip' : tokens >= price ? `Buy · ${price} tokens` : `Need ${price - tokens} more · ${price} total`;
+      button.disabled = roundActive || equipped || (!unlocked && tokens < price);
+      button.setAttribute('aria-pressed', String(equipped));
+      button.setAttribute('aria-label', `${STYLES[id].name}: ${button.textContent}`);
+    }
+  }
+  function buyOrEquip(id) {
+    if (!Object.hasOwn(STYLES, id) || state === 'waiting' || state === 'ready') return;
+    if (!owned.includes(id)) {
+      if (tokens < STYLES[id].cost) return;
+      tokens -= STYLES[id].cost;
+      owned.push(id);
+    }
+    selectedStyle = id;
+    saveProgress();
+    renderShop();
+    document.getElementById('shop-message').textContent = `${STYLES[id].name} equipped. Happy drawing, partner!`;
+  }
+  for (const button of shopButtons) button.addEventListener('click', () => buyOrEquip(button.dataset.style));
+  renderShop();
+  function tokensForReaction(ms) {
+    if (ms < 200) return 10;
+    if (ms < 300) return 7;
+    if (ms < 400) return 5;
+    if (ms < 600) return 3;
+    return 1;
+  }
+
+  // One state at a time prevents an early click from also scoring a draw.
+  function show(nextState, title, detail, symbol = '★') {
+    state = nextState;
+    renderShop();
+    arena.dataset.state = nextState;
+    prompt.textContent = title;
+    hint.textContent = detail;
+    emblem.textContent = symbol;
+    document.getElementById('announcement').textContent = title + ' ' + detail;
+  }
+
+  // A synthesized tone needs no audio file or internet connection.
+  function unlockAudio() {
+    if (!soundEnabled) return;
+    try {
+      const Audio = window.AudioContext || window.webkitAudioContext;
+      if (!Audio) return;
+      audioContext ??= new Audio();
+      if (audioContext.state === 'suspended') audioContext.resume().catch(() => {});
+    } catch { /* A missing audio device must not stop the game. */ }
+  }
+  function beep() {
+    if (!soundEnabled || !audioContext || audioContext.state !== 'running') return;
+    try {
+      const tone = audioContext.createOscillator();
+      const volume = audioContext.createGain();
+      const now = audioContext.currentTime;
+      tone.type = 'triangle';
+      tone.frequency.value = 880;
+      volume.gain.setValueAtTime(0, now);
+      volume.gain.linearRampToValueAtTime(.18, now + .005);
+      volume.gain.exponentialRampToValueAtTime(.001, now + .12);
+      tone.connect(volume);
+      volume.connect(audioContext.destination);
+      tone.start(now);
+      tone.stop(now + .13);
+      tone.onended = () => { tone.disconnect(); volume.disconnect(); };
+    } catch { /* Visual play remains available if sound fails. */ }
+  }
+  function cancelCue() { clearTimeout(timer); cancelAnimationFrame(frame); }
+  function startRound() {
+    unlockAudio();
+    cancelCue();
+    show('waiting', 'Hold steady…', 'Wait for green. Don’t draw early.', '· · ·');
+    const delay = MIN_WAIT_MS + Math.random() * (MAX_WAIT_MS - MIN_WAIT_MS);
+    timer = setTimeout(() => {
+      frame = requestAnimationFrame(() => {
+        if (state !== 'waiting' || document.hidden) return;
+        show('ready', 'DRAW!', 'Click now!', '！');
+        readyAt = performance.now();
+        beep();
+      });
+    }, delay);
+  }
+  function act() {
+    if (performance.now() < retryAfter) return;
+    if (state === 'waiting') {
+      cancelCue();
+      show('early', 'Too soon, partner!', 'Wait for green next time. Click to try again.', '×');
+      retryAfter = performance.now() + 450;
+    } else if (state === 'ready') {
+      // Monotonic, high-resolution timing is better than the wall clock.
+      const reaction = Math.max(1, Math.round(performance.now() - readyAt));
+      const newBest = best === null || reaction < best;
+      document.getElementById('last').textContent = reaction + ' ms';
+      if (newBest) {
+        best = reaction;
+        showBest();
+        try { localStorage.setItem(BEST_KEY, String(best)); } catch { storageUnavailable(); }
+      }
+      const earned = tokensForReaction(reaction);
+      tokens = Math.min(Number.MAX_SAFE_INTEGER, tokens + earned);
+      saveProgress();
+      show('result', reaction + ' ms', (newBest ? 'New personal best! ' : '') + `+${earned} tokens. Click to play again.`);
+      retryAfter = performance.now() + 450;
+    } else {
+      startRound();
+    }
+  }
+
+  // Measure the press, not the release: better for a mouse or trackpad.
+  arena.addEventListener('pointerdown', event => {
+    if (event.button !== 0 || !event.isPrimary) return;
+    event.preventDefault();
+    arena.focus({ preventScroll: true });
+    act();
+  });
+  // Keyboard and assistive-technology support without double-counting clicks.
+  arena.addEventListener('keydown', event => {
+    if (event.code === 'Space' || event.code === 'Enter') {
+      event.preventDefault();
+      if (!event.repeat) act();
+    }
+  });
+  arena.addEventListener('click', event => { if (event.detail === 0) act(); });
+  soundButton.addEventListener('click', () => {
+    soundEnabled = !soundEnabled;
+    soundButton.textContent = 'Sound: ' + (soundEnabled ? 'on' : 'off');
+    soundButton.setAttribute('aria-pressed', String(soundEnabled));
+    if (soundEnabled) unlockAudio();
+  });
+  // Switching tabs cancels the round instead of producing a misleading score.
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && (state === 'waiting' || state === 'ready')) {
+      cancelCue();
+      show('idle', 'Back in the saddle?', 'Round canceled. Click to start fresh.');
+    }
+  });
+</script>
+</body>
+</html>
